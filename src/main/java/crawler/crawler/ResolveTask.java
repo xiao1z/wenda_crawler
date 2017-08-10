@@ -3,8 +3,10 @@ package crawler.crawler;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -17,6 +19,8 @@ import model.Question;
 import model.User;
 
 public class ResolveTask implements Runnable{
+	
+	public static Set<Cookie> cookieSet;
 	
 	public static Random random = new Random();
 	
@@ -61,7 +65,6 @@ public class ResolveTask implements Runnable{
 	@Override
 	public void run() {
 		try{
-			System.out.println("selenium resolve:"+url);
 			Crawler crawler = Crawler.getCrawler();
 			WebDriver driver = crawler.getWebDriver();
 			driver.get(url);
@@ -105,7 +108,6 @@ public class ResolveTask implements Runnable{
 					}
 				}
 				List<WebElement> commentList = driver.findElements(By.cssSelector("div.List-item"));
-				
 				Question question = new Question();
 				question.setTitle(questionTitle);
 				question.setContent(questionContent.getText());
@@ -172,6 +174,7 @@ public class ResolveTask implements Runnable{
 					
 				}
 			}
+			System.out.println("selenium resolved:"+url);
 			crawler.releaseDriver(driver);
 		}catch(Exception e)
 		{

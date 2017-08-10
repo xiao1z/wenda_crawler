@@ -50,9 +50,11 @@ public class JsoupCrawler {
 
 			@Override
 			public void run() {
+				int count = 0;
 				// TODO Auto-generated method stub
 				try
 				{
+					System.out.println("startPage:"+startPage+" endPage:"+endPage);
 					for(int i = startPage;i<=endPage;i++)
 					{
 						Thread.sleep(100);
@@ -63,8 +65,10 @@ public class JsoupCrawler {
 							String href = e.attr("href");
 							if(href.startsWith(questionDetailPagePrefix)&&href.length()<questionDetailPagePrefix.length()+10)
 						    {
-								if(handledUrl.add(href))
+								if(handledUrl.add(href)){
 									urls.put(rootUrl+href);
+									count++;
+								}
 						    }
 						}
 					}
@@ -74,6 +78,7 @@ public class JsoupCrawler {
 					e.printStackTrace();
 				}finally{
 					isDone = true;
+					System.out.println("resolve count:"+count);
 				}
 			}
 		});
@@ -82,11 +87,13 @@ public class JsoupCrawler {
 	
 	public String getUrlUnresolve() throws InterruptedException
 	{
-		if(this.isDone&&this.urls.isEmpty())
-		{
-			return null;
+		String url = null;
+		while(!this.isDone||!this.urls.isEmpty()){
+			url = urls.poll(60, TimeUnit.SECONDS);
+			if(url!=null)
+				return url;
 		}
-		return urls.take();
+		return null;
 	}
 	
 	public void initResovler(int threadNum)

@@ -77,6 +77,10 @@ public class Crawler {
 					String url = null;
 					try {
 						url = cannotResolveQueue.poll(60, TimeUnit.SECONDS);
+						while(url==null&&!exec.isTerminated())
+						{
+							url = cannotResolveQueue.poll(60, TimeUnit.SECONDS);
+						}
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -93,6 +97,35 @@ public class Crawler {
 		cannotresolveUrlDispatcher.start();
 		
 	}
+	
+	/*
+	public Set<Cookie> getCookie(String url,String username,String password) throws InterruptedException{
+		this.initWebDriver(DriverType.FIREFOX);
+		WebDriver driver = this.getWebDriver();
+		driver.get(url);
+		WebElement userPasswordElement = driver.findElement(By.cssSelector("span.signin-switch-password"));
+		userPasswordElement.click();
+		Thread.sleep(1000);
+		new WebDriverWait(driver, 10);
+		WebElement usernameElement = driver.findElement(By.cssSelector("div.account.input-wrapper>input"));
+		new Actions(driver).moveToElement(usernameElement).perform();  
+		usernameElement.sendKeys(username);
+		Thread.sleep(1000);
+		WebElement passwordElement = driver.findElement(By.cssSelector("div.verification.input-wrapper>input"));
+		new Actions(driver).moveToElement(passwordElement).perform();
+		passwordElement.sendKeys(password);
+		Thread.sleep(1000);
+		Actions action = new Actions(driver);   
+		action.sendKeys(Keys.ENTER).build().perform();
+		//WebElement loginElement = driver.findElement(By.cssSelector("div.button-wrapper.command>button"));
+		//loginElement.click();
+		new WebDriverWait(driver, 10);
+		System.out.println(driver.getCurrentUrl());
+		this.closeAllDriver();
+		return null;
+	}
+	*/
+	
 	
 	public void start(int startPage,int endPage,
 			String sqlFilePath,String rootHeadUrl,String rootImgUrl){
@@ -220,7 +253,7 @@ public class Crawler {
 		}
 	}
 	
-	public static void main(String args[])
+	public static void main(String args[]) throws InterruptedException
 	{
 		/*
 		if(args.length!=3)
@@ -230,11 +263,15 @@ public class Crawler {
 		String path = args[2];
 		*/
 		
-		int startPage = 1;
-		int endPage = 1;
+	
+		int startPage = 31;
+		int endPage = 31;
 		String path = "D:/wendaDataJson";
 		String rootHeadUrl = "D:/tempImg";
 		String rootImgUrl = "D:/question";
 		Crawler.getCrawler().start(startPage,endPage,path,rootHeadUrl,rootImgUrl);
+		
+		
+		//new Crawler().getCookie("https://www.zhihu.com/#signin", "15754311189", "z840078718");
 	}
 }
