@@ -264,11 +264,11 @@ public class Crawler {
 		*/
 		
 	
-		int startPage = 31;
-		int endPage = 31;
+		int startPage = 1;
+		int endPage = 45;
 		String path = "D:/wendaDataJson";
-		String rootHeadUrl = "D:/tempImg";
-		String rootImgUrl = "D:/question";
+		String rootHeadUrl = "D:/headimg";
+		String rootImgUrl = "D:/questionimg";
 		Crawler.getCrawler().start(startPage,endPage,path,rootHeadUrl,rootImgUrl);
 		
 		

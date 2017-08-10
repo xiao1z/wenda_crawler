@@ -109,7 +109,6 @@ public class JsoupCrawler {
 	}
 	
 	
-	
 	public void resolve(final String url)
 	{
 		if(exec == null)
@@ -119,7 +118,7 @@ public class JsoupCrawler {
 
 			@Override
 			public void run() {
-				System.out.println("jsoup resovle:"+url);
+				System.out.println("jsoup resovle:"+url);				
 				
 				try {
 					Document doc = Jsoup.connect(url).userAgent("GoogleBot").get();
@@ -130,7 +129,6 @@ public class JsoupCrawler {
 						questionContent = doc.select("div.QuestionRichText.QuestionRichText--expandable.QuestionRichText--collapsed>div>span");
 					}
 					Elements commentList = doc.select("div.List-item");
-					
 					Question question = new Question();
 					question.setTitle(questionTitle);
 					if(questionContent!=null)
@@ -139,23 +137,21 @@ public class JsoupCrawler {
 					question.setId(Question.tempId.incrementAndGet());
 					question.setCommentCount(commentList.size());
 					JsonManager.getJsonManager().addQuestion(question);
-					
-					for(Element commentElement:commentList){
+					for(int i = 0;i<commentList.size();i++){
 						User user = new User();
-						
-						Elements userImgElement = commentElement.select("img.Avatar.AuthorInfo-avatar");
+						Elements userImgElement = commentList.get(i).select("img.Avatar.AuthorInfo-avatar");
 						if(userImgElement!=null)
 						{
 							String imgUrl = userImgElement.first().attr("src");
 							user.setHeadUrl(ImgDownloader.download(imgUrl, Crawler.ROOT_HEAD_URL));
 						}
-						Elements userNameElement = commentElement.select("span.UserLink.AuthorInfo-name>div>div>a");
+						Elements userNameElement = commentList.get(i).select("span.UserLink.AuthorInfo-name>div>div>a");
 						if(userNameElement!=null)
 						{
 							user.setUsername(userNameElement.first().text());
 							user.setNickname(userNameElement.first().text());
 						}
-						Elements userDescriptionElement = commentElement.select("div.AuthorInfo-detail>div>div");
+						Elements userDescriptionElement = commentList.get(i).select("div.AuthorInfo-detail>div>div");
 						if(userDescriptionElement!=null)
 							user.setBriefIntroduction(userDescriptionElement.first().text());
 						user.setId(User.tempId.incrementAndGet());
@@ -168,27 +164,27 @@ public class JsoupCrawler {
 						comment.setEntityType(EntityType.QUESTION);
 						comment.setUserId(user.getId());
 						
-						Elements commentContent = commentElement.select("div.RichContent-inner");
+						Elements commentContent = commentList.get(i).select("div.RichContent-inner");
 						if(commentContent!=null)
 						{
 							comment.setContent(commentContent.first().text());
 						}
 						comment.setId(Comment.tempId.incrementAndGet());
 							
-						Elements imgElementList = commentElement.select("div.RichContent-inner>span>span>div");
+						Elements imgElementList = commentList.get(i).select("div.RichContent-inner>span>noscript>img");
 						if(imgElementList!=null)
 						{
 							comment.setImgCount(imgElementList.size());
 							JsonManager.getJsonManager().addComment(comment);
 							int offset = 1;
-							for(Element imgElement:imgElementList)
+							for(int j=0;j<imgElementList.size();j++)
 							{
 								Img img = new Img();
 								img.setEntityId(comment.getId());
 								img.setEntityType(EntityType.COMMENT);
 								img.setId(Img.tempId.incrementAndGet());
 								img.setOffset(offset++);
-								String imgUrl = imgElement.attr("data-src");
+								String imgUrl = imgElementList.get(j).attr("src");
 								img.setUrl(ImgDownloader.download(imgUrl, Crawler.ROOT_IMG_URL));
 								JsonManager.getJsonManager().addImg(img);
 							}
