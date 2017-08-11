@@ -64,9 +64,9 @@ public class ResolveTask implements Runnable{
 	
 	@Override
 	public void run() {
+		Crawler crawler = Crawler.getCrawler();
+		WebDriver driver = crawler.getWebDriver();
 		try{
-			Crawler crawler = Crawler.getCrawler();
-			WebDriver driver = crawler.getWebDriver();
 			driver.get(url);
 			String questionTitle = findWebElement(driver,"h1.QuestionHeader-title").getText();
 			boolean match = false;
@@ -179,6 +179,8 @@ public class ResolveTask implements Runnable{
 		}catch(Exception e)
 		{
 			e.printStackTrace();
+			if(crawler!=null)
+				crawler.refreshDriver(driver);
 		}
 	}
 }

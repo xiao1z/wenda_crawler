@@ -2,12 +2,14 @@ package crawler.crawler;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriver;
 
 public class Crawler {
 	
@@ -15,7 +17,7 @@ public class Crawler {
 	private int driverNum = 2;
 	
 	//待解析url的最大缓存量
-	private int maxCacheNum = Integer.MAX_VALUE;
+	//private int maxCacheNum = Integer.MAX_VALUE;
 	
 	//头像图片根地址
 	static String ROOT_HEAD_URL;
@@ -28,6 +30,9 @@ public class Crawler {
 	private ExecutorService exec;
 	
 	private JsoupCrawler jsoupCrawler;
+	
+	private DriverType type;
+	
 	
 	enum DriverType{
 		FIREFOX,
@@ -163,6 +168,7 @@ public class Crawler {
 	
 	private void initWebDriver(DriverType type)
 	{
+		this.type = type;
 		queue = new LinkedBlockingQueue<WebDriver>(driverNum);
 		try {
 			switch(type)
@@ -182,7 +188,7 @@ public class Crawler {
 				System.setProperty("webdriver.chrome.driver","drivers/chromedriver.exe");
 				for(int i=0;i<driverNum;i++)
 				{
-					WebDriver d = new FirefoxDriver();				
+					WebDriver d = new ChromeDriver();				
 					queue.put(d);
 				}
 				break;
@@ -192,7 +198,7 @@ public class Crawler {
 				System.setProperty("phantomjs.binary.path","drivers/phantomjs.exe");
 				for(int i=0;i<driverNum;i++)
 				{
-					WebDriver d = new FirefoxDriver();				
+					WebDriver d = new PhantomJSDriver();				
 					queue.put(d);
 				}
 				break;
@@ -215,13 +221,7 @@ public class Crawler {
 		jsoupCrawler.startCrawl();
 		cannotResolveQueue = new LinkedBlockingQueue<String>();
 		this.initWebDriver(DriverType.FIREFOX);
-		exec = new ThreadPoolExecutor(
-				driverNum,
-				driverNum, 
-	            60,
-	            TimeUnit.SECONDS,
-	            new LinkedBlockingQueue<Runnable>(maxCacheNum),
-	            new ThreadPoolExecutor.CallerRunsPolicy());
+		exec = Executors.newFixedThreadPool(driverNum);
 	}
 	
 	public WebDriver getWebDriver()
@@ -233,6 +233,39 @@ public class Crawler {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public void refreshDriver(WebDriver webDriver){
+		if(webDriver!=null)
+			webDriver.quit();
+		try {
+			WebDriver d = null;
+			switch(type)
+			{
+				case FIREFOX:
+				{
+					d = new FirefoxDriver();				
+					break;
+				}
+				case CHROME:
+				{
+					d = new ChromeDriver();				
+					break;
+				}
+				case PHANTOMJS:
+				{
+					d = new PhantomJSDriver();				
+					break;
+				}
+				default:
+					break;
+			}
+			if(d!=null)
+				queue.put(d);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void releaseDriver(WebDriver webDriver)
@@ -272,6 +305,5 @@ public class Crawler {
 		Crawler.getCrawler().start(startPage,endPage,path,rootHeadUrl,rootImgUrl);
 		
 		
-		//new Crawler().getCookie("https://www.zhihu.com/#signin", "15754311189", "z840078718");
 	}
 }

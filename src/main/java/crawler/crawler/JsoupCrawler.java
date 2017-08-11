@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.jsoup.Jsoup;
@@ -98,9 +98,7 @@ public class JsoupCrawler {
 	
 	public void initResovler(int threadNum)
 	{
-		exec = new ThreadPoolExecutor(
-				threadNum,threadNum,0,TimeUnit.SECONDS,
-				new LinkedBlockingQueue<Runnable>(),new ThreadPoolExecutor.CallerRunsPolicy());
+		exec = Executors.newFixedThreadPool(threadNum);
 	}
 	
 	public void shutDownResovler()
